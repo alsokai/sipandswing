@@ -109,7 +109,7 @@
         </article>
         <article class="soft-card rounded-2xl p-4 bg-[#dbe7f0] text-[#182437]">
           <p class="text-sm font-semibold">ยอดขายวันนี้</p>
-          <p id="today-sales-count" class="mt-1 text-3xl font-bold text-[#25745d]">฿0</p>
+          <p id="today-sales-count" class="mt-1 text-3xl font-bold text-[#25745d]">LSD 0</p>
         </article>
       </section>
 
@@ -175,7 +175,7 @@
                 </div>
                 <div class="flex justify-between text-base font-bold text-[#182437]">
                   <span>ราคารวมทั้งหมด</span> 
-                  <span id="cart-total-price" class="text-[#dc6b34] text-lg">฿0</span>
+                  <span id="cart-total-price" class="text-[#dc6b34] text-lg">LSD 0</span>
                 </div>
                 <button id="confirm-order-btn" class="w-full rounded-xl bg-[#25745d] py-3 font-bold text-white transition hover:bg-[#1f604d] disabled:cursor-not-allowed disabled:opacity-50 mt-2" type="submit">ยืนยันการสั่ง</button> 
                 <button id="clear-cart-btn" class="mt-2 w-full rounded-xl border border-[#cbd5e1] py-2 font-semibold text-[#475569] transition hover:bg-[#f1f5f9]" type="button">ล้างรายการ</button>
@@ -300,7 +300,7 @@
             <input id="menu-name" class="w-full rounded-xl border border-[#344862] bg-[#111c2d] px-3 py-2.5 text-white" type="text" required>
           </div>
           <div>
-            <label class="mb-1 block text-sm font-semibold text-[#dbe7f0]" for="menu-price">ราคาต่อเสิร์ฟ (บาท)</label>
+            <label class="mb-1 block text-sm font-semibold text-[#dbe7f0]" for="menu-price">ราคาต่อเสิร์ฟ (LSD)</label>
             <input id="menu-price" class="number-input w-full rounded-xl border border-[#344862] bg-[#111c2d] px-3 py-2.5 text-white" type="number" min="0" step="1" value="100" required>
           </div>
           <div>
@@ -350,7 +350,7 @@
     const $ = id => document.getElementById(id);
     const uid = prefix => prefix + "-" + Date.now().toString(36) + Math.random().toString(36).slice(2,5);
     const formatDate = iso => new Date(iso).toLocaleString("th-TH", { dateStyle: "medium", timeStyle: "short" });
-    const formatMoney = amount => "฿" + Number(amount || 0).toLocaleString("th-TH");
+    const formatMoney = amount => "LSD " + Number(amount || 0).toLocaleString("th-TH");
     const esc = s => String(s || "").replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
 
     // Toast Notification
@@ -991,11 +991,11 @@
 
       // Export CSV
       $("export-csv-btn").addEventListener("click", () => {
-        const rows = [["เลขที่คำสั่งซื้อ", "วันเวลา", "ผู้สั่ง", "รายการ", "จำนวนรวม", "ราคารวมทั้งหมด (บาท)", "สถานะ"]];
+        const rows = [["เลขที่คำสั่งซื้อ", "วันเวลา", "ผู้สั่ง", "รายการ", "จำนวนรวม", "ราคารวมทั้งหมด (LSD)", "สถานะ"]];
         state.orders.forEach(o => {
           let items = [];
           try { items = typeof o.order_items === 'string' ? JSON.parse(o.order_items) : o.order_items; } catch(e) {}
-          const itemText = items.map(i => `${i.menu_name} (x${i.quantity} @ ฿${i.menu_price || 0})`).join(" | ");
+          const itemText = items.map(i => `${i.menu_name} (x${i.quantity} @ LSD ${i.menu_price || 0})`).join(" | ");
           rows.push([o.order_id, formatDate(o.order_datetime), o.employee_name, itemText, o.order_total, o.order_total_price || 0, o.order_status]);
         });
 
