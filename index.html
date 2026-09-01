@@ -44,9 +44,9 @@
     .hidden-view { display: none !important; }
     .number-input::-webkit-outer-spin-button, .number-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
     .number-input { -moz-appearance: textfield; }
-    .menu-photo { position: relative; overflow: hidden; background: #253652; }
+    .menu-photo { position: relative; overflow: hidden; background: #253652; aspect-ratio: 1 / 1; width: 100%; }
     .menu-photo img { width: 100%; height: 100%; object-fit: cover; }
-    .menu-photo-empty { min-height: 120px; border: 1px dashed #66809f; }
+    .menu-photo-empty { border: 1px dashed #66809f; }
     
     /* Admin Lock Visibility Control */
     .admin-only { display: none !important; }
@@ -108,8 +108,8 @@
           <p id="low-stock-count" class="mt-1 text-3xl font-bold text-[#ad7312]">0</p>
         </article>
         <article class="soft-card rounded-2xl p-4 bg-[#dbe7f0] text-[#182437]">
-          <p class="text-sm font-semibold">คำสั่งซื้อวันนี้</p>
-          <p id="today-orders-count" class="mt-1 text-3xl font-bold text-[#25745d]">0</p>
+          <p class="text-sm font-semibold">ยอดขายวันนี้</p>
+          <p id="today-sales-count" class="mt-1 text-3xl font-bold text-[#25745d]">฿0</p>
         </article>
       </section>
 
@@ -143,7 +143,7 @@
         <div class="grid gap-6 lg:grid-cols-[minmax(0,1.45fr)_360px]">
           <!-- Menu Grid -->
           <section aria-label="รายการเมนู">
-            <div id="menu-list" class="grid gap-4 sm:grid-cols-2"></div>
+            <div id="menu-list" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"></div>
             <div id="menu-empty" class="hidden rounded-2xl border-2 border-dashed border-[#344862] bg-[#142033] px-6 py-12 text-center">
               <i data-lucide="soup" class="mx-auto mb-3 h-10 w-10 text-[#c69567]"></i>
               <h3 class="font-bold text-lg text-white">ยังไม่มีเมนูอาหาร</h3>
@@ -168,12 +168,16 @@
               <div id="cart-list" class="my-4 space-y-3 max-h-80 overflow-y-auto pr-1"></div>
               <p id="cart-empty" class="rounded-xl bg-[#f1f5f9] p-4 text-center text-sm text-[#64748b]">ยังไม่มีเมนูในรายการสั่ง เลือกเมนูจากด้านซ้ายเพื่อเริ่มต้น</p>
 
-              <div class="border-t border-[#e2e8f0] pt-4">
-                <div class="mb-4 flex justify-between text-sm font-semibold text-[#182437]">
+              <div class="border-t border-[#e2e8f0] pt-4 space-y-2">
+                <div class="flex justify-between text-sm font-semibold text-[#64748b]">
                   <span>จำนวนรวม</span> 
-                  <span id="cart-total-text">0 รายการ</span>
+                  <span id="cart-total-qty">0 รายการ</span>
                 </div>
-                <button id="confirm-order-btn" class="w-full rounded-xl bg-[#25745d] py-3 font-bold text-white transition hover:bg-[#1f604d] disabled:cursor-not-allowed disabled:opacity-50" type="submit">ยืนยันการสั่ง</button> 
+                <div class="flex justify-between text-base font-bold text-[#182437]">
+                  <span>ราคารวมทั้งหมด</span> 
+                  <span id="cart-total-price" class="text-[#dc6b34] text-lg">฿0</span>
+                </div>
+                <button id="confirm-order-btn" class="w-full rounded-xl bg-[#25745d] py-3 font-bold text-white transition hover:bg-[#1f604d] disabled:cursor-not-allowed disabled:opacity-50 mt-2" type="submit">ยืนยันการสั่ง</button> 
                 <button id="clear-cart-btn" class="mt-2 w-full rounded-xl border border-[#cbd5e1] py-2 font-semibold text-[#475569] transition hover:bg-[#f1f5f9]" type="button">ล้างรายการ</button>
               </div>
             </form>
@@ -296,6 +300,10 @@
             <input id="menu-name" class="w-full rounded-xl border border-[#344862] bg-[#111c2d] px-3 py-2.5 text-white" type="text" required>
           </div>
           <div>
+            <label class="mb-1 block text-sm font-semibold text-[#dbe7f0]" for="menu-price">ราคาต่อเสิร์ฟ (บาท)</label>
+            <input id="menu-price" class="number-input w-full rounded-xl border border-[#344862] bg-[#111c2d] px-3 py-2.5 text-white" type="number" min="0" step="1" value="100" required>
+          </div>
+          <div>
             <label class="mb-1 block text-sm font-semibold text-[#dbe7f0]" for="menu-description">รายละเอียดสั้น ๆ</label>
             <input id="menu-description" class="w-full rounded-xl border border-[#344862] bg-[#111c2d] px-3 py-2.5 text-white" type="text">
           </div>
@@ -332,16 +340,17 @@
     };
 
     const DEFAULT_MENUS = [
-      { menu_id: "menu-001", menu_name: "Smoky Wings", menu_description: "ปีกไก่รมควันซอสบาร์บีคิวสูตรพิเศษ", menu_stock: 15, menu_image: "https://images.unsplash.com/photo-1567620832903-9fc6debc209f?w=400" },
-      { menu_id: "menu-002", menu_name: "All that Jazz", menu_description: "ค็อกเทลลายเซ็นของร้าน รสนุ่มละมุน", menu_stock: 10, menu_image: "https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?w=400" },
-      { menu_id: "menu-003", menu_name: "Charcuterie", menu_description: "ชีสบอร์ดพร้อมไส้กรอกพรีเมียมและผลไม้แห้ง", menu_stock: 5, menu_image: "https://images.unsplash.com/photo-1541529086526-db283c563270?w=400" },
-      { menu_id: "menu-004", menu_name: "The Velvet Swing", menu_description: "เครื่องดื่มมอคค่าเข้มข้นท็อปวิปครีม", menu_stock: 20, menu_image: "https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=400" },
-      { menu_id: "menu-005", menu_name: "Truffle Brass Fries", menu_description: "เฟรนช์ฟรายส์ซอสทรัฟเฟิลหอมกลมกล่อม", menu_stock: 12, menu_image: "https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=400" }
+      { menu_id: "menu-001", menu_name: "Smoky Wings", menu_price: 180, menu_description: "ปีกไก่รมควันซอสบาร์บีคิวสูตรพิเศษ", menu_stock: 15, menu_image: "https://images.unsplash.com/photo-1567620832903-9fc6debc209f?w=400" },
+      { menu_id: "menu-002", menu_name: "All that Jazz", menu_price: 280, menu_description: "ค็อกเทลลายเซ็นของร้าน รสนุ่มละมุน", menu_stock: 10, menu_image: "https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?w=400" },
+      { menu_id: "menu-003", menu_name: "Charcuterie", menu_price: 450, menu_description: "ชีสบอร์ดพร้อมไส้กรอกพรีเมียมและผลไม้แห้ง", menu_stock: 5, menu_image: "https://images.unsplash.com/photo-1541529086526-db283c563270?w=400" },
+      { menu_id: "menu-004", menu_name: "The Velvet Swing", menu_price: 160, menu_description: "เครื่องดื่มมอคค่าเข้มข้นท็อปวิปครีม", menu_stock: 20, menu_image: "https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=400" },
+      { menu_id: "menu-005", menu_name: "Truffle Brass Fries", menu_price: 140, menu_description: "เฟรนช์ฟรายส์ซอสทรัฟเฟิลหอมกลมกล่อม", menu_stock: 12, menu_image: "https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=400" }
     ];
 
     const $ = id => document.getElementById(id);
     const uid = prefix => prefix + "-" + Date.now().toString(36) + Math.random().toString(36).slice(2,5);
     const formatDate = iso => new Date(iso).toLocaleString("th-TH", { dateStyle: "medium", timeStyle: "short" });
+    const formatMoney = amount => "฿" + Number(amount || 0).toLocaleString("th-TH");
     const esc = s => String(s || "").replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
 
     // Toast Notification
@@ -415,11 +424,12 @@
       const newCount = state.orders.filter(o => o.order_status === "ใหม่").length;
       const low = state.menus.filter(m => Number(m.menu_stock) <= 5).length;
       const today = new Date().toISOString().slice(0,10);
-      const daily = state.orders.filter(o => (o.order_datetime || "").slice(0,10) === today).length;
+      const todayOrders = state.orders.filter(o => (o.order_datetime || "").slice(0,10) === today && o.order_status !== "ยกเลิก");
+      const todaySales = todayOrders.reduce((acc, o) => acc + Number(o.order_total_price || 0), 0);
 
       $("new-orders-count").textContent = newCount;
       $("low-stock-count").textContent = low;
-      $("today-orders-count").textContent = daily;
+      $("today-sales-count").textContent = formatMoney(todaySales);
       $("stock-alert").classList.toggle("hidden", low === 0);
     }
 
@@ -431,37 +441,49 @@
 
       state.menus.forEach(menu => {
         const stockNum = Number(menu.menu_stock);
+        const priceNum = Number(menu.menu_price || 0);
         const [label, cls] = statusStock(stockNum);
         const inCart = state.cart.find(x => x.menu_id === menu.menu_id);
         
         const card = document.createElement("article");
-        card.className = "menu-card soft-card rounded-2xl p-4";
+        card.className = "menu-card soft-card rounded-2xl p-4 flex flex-col justify-between";
         card.innerHTML = `
-          <div class="menu-photo ${menu.menu_image ? "" : "menu-photo-empty"} mb-3 flex h-36 w-full items-center justify-center rounded-xl text-center">
-            ${menu.menu_image ? `<img src="${esc(menu.menu_image)}" alt="${esc(menu.menu_name)}">` : '<span class="text-xs font-semibold text-[#9db2c4]">ไม่มีรูปเมนู</span>'}
-          </div>
-          <div class="flex items-start justify-between gap-2">
-            <h3 class="font-bold text-lg text-white">${esc(menu.menu_name)}</h3>
-            <span class="${cls} shrink-0 rounded-full px-2.5 py-0.5 text-xs font-bold">${label}</span>
-          </div>
-          <p class="mt-1 text-xs text-[#c7d3de] line-clamp-2">${esc(menu.menu_description || "ไม่มีรายละเอียด")}</p>
-          
-          <div class="mt-4 flex items-center justify-between border-t border-[#2b3a50] pt-3">
-            <div>
-              <p class="text-[11px] font-semibold text-[#9db2c4]">จำนวนคงเหลือ</p>
-              <p class="font-bold text-sm text-white">${stockNum} เสิร์ฟ</p>
+          <div>
+            <!-- 1:1 Aspect Ratio Photo Container -->
+            <div class="menu-photo ${menu.menu_image ? "" : "menu-photo-empty"} mb-3 flex items-center justify-center rounded-xl overflow-hidden bg-[#253652]">
+              ${menu.menu_image ? `<img src="${esc(menu.menu_image)}" alt="${esc(menu.menu_name)}">` : '<span class="text-xs font-semibold text-[#9db2c4]">ไม่มีรูปเมนู</span>'}
             </div>
-            ${state.isAdmin ? `
-            <div class="flex gap-1">
-              <button class="edit-menu rounded-lg p-2 text-[#c7d3de] hover:bg-[#30435d]" data-id="${menu.menu_id}" type="button"><i data-lucide="pencil" class="h-4 w-4"></i></button>
-              <button class="delete-menu rounded-lg p-2 ${state.deletePending === menu.menu_id ? "bg-[#b84232] text-white" : "text-[#f0b0a8] hover:bg-[#30435d]"}" data-id="${menu.menu_id}" type="button">
-                ${state.deletePending === menu.menu_id ? '<span class="text-xs font-bold">ยืนยัน</span>' : '<i data-lucide="trash-2" class="h-4 w-4"></i>'}
-              </button>
-            </div>` : ''}
+            <div class="flex items-start justify-between gap-2">
+              <h3 class="font-bold text-lg text-white">${esc(menu.menu_name)}</h3>
+              <span class="${cls} shrink-0 rounded-full px-2.5 py-0.5 text-xs font-bold">${label}</span>
+            </div>
+            <p class="mt-1 text-xs text-[#c7d3de] line-clamp-2">${esc(menu.menu_description || "ไม่มีรายละเอียด")}</p>
           </div>
-          <button class="add-cart mt-3 w-full rounded-xl py-2 text-sm font-bold transition ${stockNum === 0 ? "cursor-not-allowed bg-[#334155] text-[#94a3b8]" : "bg-[#dc6b34] text-white hover:bg-[#c45b27]"}" data-id="${menu.menu_id}" type="button" ${stockNum === 0 ? "disabled" : ""}>
-            ${inCart ? `เพิ่มอีก (ในตะกร้า ${inCart.quantity})` : "เพิ่มลงรายการสั่ง"}
-          </button>
+          
+          <div>
+            <div class="mt-4 flex items-center justify-between border-t border-[#2b3a50] pt-3">
+              <div>
+                <p class="text-[11px] font-semibold text-[#9db2c4]">ราคา</p>
+                <p class="font-bold text-lg text-[#f2b16f]">${formatMoney(priceNum)}</p>
+              </div>
+              <div class="text-right">
+                <p class="text-[11px] font-semibold text-[#9db2c4]">คงเหลือ</p>
+                <p class="font-bold text-sm text-white">${stockNum} เสิร์ฟ</p>
+              </div>
+            </div>
+
+            <div class="mt-3 flex gap-2 items-center">
+              ${state.isAdmin ? `
+                <button class="edit-menu rounded-xl p-2.5 border border-[#344862] text-[#c7d3de] hover:bg-[#30435d]" data-id="${menu.menu_id}" type="button" title="แก้ไขเมนู"><i data-lucide="pencil" class="h-4 w-4"></i></button>
+                <button class="delete-menu rounded-xl p-2.5 border border-[#344862] ${state.deletePending === menu.menu_id ? "bg-[#b84232] text-white" : "text-[#f0b0a8] hover:bg-[#30435d]"}" data-id="${menu.menu_id}" type="button" title="ลบเมนู">
+                  ${state.deletePending === menu.menu_id ? '<span class="text-xs font-bold">ยืนยัน</span>' : '<i data-lucide="trash-2" class="h-4 w-4"></i>'}
+                </button>
+              ` : ''}
+              <button class="add-cart flex-1 rounded-xl py-2.5 text-sm font-bold transition ${stockNum === 0 ? "cursor-not-allowed bg-[#334155] text-[#94a3b8]" : "bg-[#dc6b34] text-white hover:bg-[#c45b27]"}" data-id="${menu.menu_id}" type="button" ${stockNum === 0 ? "disabled" : ""}>
+                ${inCart ? `เพิ่มอีก (${inCart.quantity})` : "เพิ่มลงรายการสั่ง"}
+              </button>
+            </div>
+          </div>
         `;
         list.appendChild(card);
       });
@@ -473,19 +495,26 @@
       const list = $("cart-list");
       list.innerHTML = "";
       $("cart-empty").classList.toggle("hidden", state.cart.length > 0);
-      let total = 0;
+      let totalQty = 0;
+      let totalPrice = 0;
 
       state.cart.forEach(item => {
-        total += item.quantity;
+        const itemTotal = item.quantity * item.menu_price;
+        totalQty += item.quantity;
+        totalPrice += itemTotal;
+
         const row = document.createElement("div");
         row.className = "rounded-xl border border-[#cbd5e1] bg-white p-3 text-[#182437]";
         row.innerHTML = `
           <div class="flex items-start justify-between gap-2">
-            <p class="font-semibold text-sm">${esc(item.menu_name)}</p>
+            <div>
+              <p class="font-semibold text-sm">${esc(item.menu_name)}</p>
+              <p class="text-xs text-[#64748b]">${formatMoney(item.menu_price)} / เสิร์ฟ</p>
+            </div>
             <button class="cart-remove text-[#ef4444] hover:text-[#b91c1c]" data-id="${item.menu_id}" type="button"><i data-lucide="x" class="h-4 w-4"></i></button>
           </div>
-          <div class="mt-2 flex items-center justify-between">
-            <span class="text-xs text-[#64748b]">เหลือ ${item.stock}</span>
+          <div class="mt-2 flex items-center justify-between border-t border-[#f1f5f9] pt-2">
+            <span class="font-bold text-sm text-[#dc6b34]">${formatMoney(itemTotal)}</span>
             <div class="flex items-center gap-2">
               <button class="cart-adjust rounded-lg bg-[#f1f5f9] px-2 py-0.5 font-bold text-sm" data-id="${item.menu_id}" data-delta="-1" type="button">−</button>
               <span class="min-w-4 text-center font-bold text-sm">${item.quantity}</span>
@@ -496,8 +525,9 @@
         list.appendChild(row);
       });
 
-      $("cart-total-pill").textContent = total;
-      $("cart-total-text").textContent = total + " รายการ";
+      $("cart-total-pill").textContent = totalQty;
+      $("cart-total-qty").textContent = totalQty + " รายการ";
+      $("cart-total-price").textContent = formatMoney(totalPrice);
       lucide.createIcons();
     }
 
@@ -546,7 +576,11 @@
               </div>
               <p class="mt-1 text-xs text-[#c7d3de]">${esc(order.employee_name)} · ${formatDate(order.order_datetime)}</p>
             </div>
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-3">
+              <div class="text-right">
+                <p class="text-xs text-[#9db2c4]">ราคารวม</p>
+                <p class="font-bold text-base text-[#f2b16f]">${formatMoney(order.order_total_price || 0)}</p>
+              </div>
               ${state.isAdmin ? `
               <select class="order-status-select rounded-xl border border-[#344862] bg-[#111c2d] px-2.5 py-1.5 text-xs text-[#eef4f7]" data-id="${order.order_id}">
                 <option ${order.order_status==="ใหม่"?"selected":""}>ใหม่</option>
@@ -558,10 +592,18 @@
             </div>
           </div>
           <div class="order-detail-panel mt-3 hidden border-t border-[#2b3a50] pt-3">
-            <ul class="space-y-1">
-              ${(items || []).map(i => `<li class="flex justify-between text-xs text-[#c7d3de]"><span>${esc(i.menu_name)}</span><strong>x${i.quantity}</strong></li>`).join("")}
+            <ul class="space-y-1.5">
+              ${(items || []).map(i => `
+                <li class="flex justify-between text-xs text-[#c7d3de]">
+                  <span>${esc(i.menu_name)} (x${i.quantity})</span>
+                  <strong>${formatMoney((i.menu_price || 0) * i.quantity)}</strong>
+                </li>
+              `).join("")}
             </ul>
-            <p class="mt-2 text-right text-xs font-bold text-[#dc6b34]">รวม ${order.order_total} รายการ</p>
+            <div class="mt-3 flex justify-between border-t border-[#2b3a50]/60 pt-2 text-xs font-bold">
+              <span class="text-[#9db2c4]">จำนวนรวม ${order.order_total} รายการ</span>
+              <span class="text-[#f2b16f]">รวมเงินทั้งหมด ${formatMoney(order.order_total_price || 0)}</span>
+            </div>
           </div>
         `;
         list.appendChild(el);
@@ -573,6 +615,7 @@
       if (!state.isAdmin) return toast("ต้องเข้าสู่ระบบผู้ดูแลก่อนจัดการเมนู", "error");
       $("editing-menu-id").value = menu ? menu.menu_id : "";
       $("menu-name").value = menu ? menu.menu_name : "";
+      $("menu-price").value = menu ? (menu.menu_price || 0) : 100;
       $("menu-description").value = menu ? menu.menu_description : "";
       $("menu-image").value = menu ? (menu.menu_image || "") : "";
       $("menu-stock").value = menu ? menu.menu_stock : 10;
@@ -731,15 +774,17 @@
         if (!state.isAdmin) return toast("ไม่มีสิทธิ์แก้ไขข้อมูล", "error");
 
         const name = $("menu-name").value.trim();
+        const price = Number($("menu-price").value);
         const stock = Number($("menu-stock").value);
         const editId = $("editing-menu-id").value;
 
-        if (!name || stock < 0) return toast("กรุณากรอกข้อมูลให้ครบถ้วน", "error");
+        if (!name || stock < 0 || price < 0) return toast("กรุณากรอกข้อมูลให้ครบถ้วน", "error");
 
         if (editId) {
           const menu = state.menus.find(m => m.menu_id === editId);
           if (menu) {
             menu.menu_name = name;
+            menu.menu_price = price;
             menu.menu_description = $("menu-description").value.trim();
             menu.menu_image = $("menu-image").value.trim();
             menu.menu_stock = stock;
@@ -748,6 +793,7 @@
           state.menus.push({
             menu_id: uid("menu"),
             menu_name: name,
+            menu_price: price,
             menu_description: $("menu-description").value.trim(),
             menu_image: $("menu-image").value.trim(),
             menu_stock: stock
@@ -774,7 +820,13 @@
             if (inCart.quantity >= menu.menu_stock) return toast("จำนวนเกินสต็อกคงเหลือ", "error");
             inCart.quantity++;
           } else {
-            state.cart.push({ menu_id: menu.menu_id, menu_name: menu.menu_name, quantity: 1, stock: menu.menu_stock });
+            state.cart.push({
+              menu_id: menu.menu_id,
+              menu_name: menu.menu_name,
+              menu_price: Number(menu.menu_price || 0),
+              quantity: 1,
+              stock: menu.menu_stock
+            });
           }
           renderCart();
           renderMenus();
@@ -857,6 +909,10 @@
           state.employees.push({ employee_id: uid("EMP"), employee_name: empName });
         }
 
+        // Calculate Totals
+        const totalQty = state.cart.reduce((a,b) => a + b.quantity, 0);
+        const totalPrice = state.cart.reduce((a,b) => a + (b.quantity * b.menu_price), 0);
+
         // Create Order
         const now = new Date().toISOString();
         const orderId = "ORD-" + now.slice(0,10).replace(/-/g,"") + "-" + Math.floor(Math.random()*900+100);
@@ -865,8 +921,15 @@
           order_id: orderId,
           order_datetime: now,
           employee_name: empName,
-          order_items: JSON.stringify(state.cart.map(c => ({ menu_id: c.menu_id, menu_name: c.menu_name, quantity: c.quantity }))),
-          order_total: state.cart.reduce((a,b) => a + b.quantity, 0),
+          order_items: JSON.stringify(state.cart.map(c => ({
+            menu_id: c.menu_id,
+            menu_name: c.menu_name,
+            menu_price: c.menu_price,
+            quantity: c.quantity,
+            subtotal: c.quantity * c.menu_price
+          }))),
+          order_total: totalQty,
+          order_total_price: totalPrice,
           order_status: "ใหม่"
         });
 
@@ -928,12 +991,12 @@
 
       // Export CSV
       $("export-csv-btn").addEventListener("click", () => {
-        const rows = [["เลขที่คำสั่งซื้อ", "วันเวลา", "ผู้สั่ง", "รายการ", "จำนวนรวม", "สถานะ"]];
+        const rows = [["เลขที่คำสั่งซื้อ", "วันเวลา", "ผู้สั่ง", "รายการ", "จำนวนรวม", "ราคารวมทั้งหมด (บาท)", "สถานะ"]];
         state.orders.forEach(o => {
           let items = [];
           try { items = typeof o.order_items === 'string' ? JSON.parse(o.order_items) : o.order_items; } catch(e) {}
-          const itemText = items.map(i => `${i.menu_name} x${i.quantity}`).join(" | ");
-          rows.push([o.order_id, formatDate(o.order_datetime), o.employee_name, itemText, o.order_total, o.order_status]);
+          const itemText = items.map(i => `${i.menu_name} (x${i.quantity} @ ฿${i.menu_price || 0})`).join(" | ");
+          rows.push([o.order_id, formatDate(o.order_datetime), o.employee_name, itemText, o.order_total, o.order_total_price || 0, o.order_status]);
         });
 
         const csvContent = "\uFEFF" + rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(",")).join("\n");
